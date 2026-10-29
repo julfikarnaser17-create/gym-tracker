@@ -4,6 +4,7 @@ from tambah import tambah_latihan
 
 def muat_data():
   df = pd.read_csv("data_latihan.csv")
+  df = df.drop_duplicates()
   df["tanggal"] = pd.to_datetime(df["tanggal"])
   df["volume"] = df["beban_kg"] * df["repetisi"] * df["set"]
   df = df.sort_values(["latihan", "tanggal"])
@@ -32,7 +33,7 @@ def cek_stagnan(batas=3):
   for nama, data in df.groupby("latihan"):
     beban_stagnan = (data["selisih_beban"].tail(batas) <= 0).all()
     volume_stagnan = (data["selisih_volume"].tail(batas) <= 0).all()
-    
+     
     if data["selisih_beban"].iloc[-1] < 0:
       print(f"{nama}: TURUN, beban sesi terakhir lebih ringan dari sebelumnya")
       continue
