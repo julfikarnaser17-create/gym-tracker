@@ -8,6 +8,7 @@ def muat_data():
   df["volume"] = df["beban_kg"] * df["repetisi"] * df["set"]
   df = df.sort_values(["latihan", "tanggal"])
   df["selisih_beban"] = df.groupby("latihan")["beban_kg"].diff()
+  df["selisih_volume"] = df.groupby("latihan")["volume"].diff()
   return df
 
 def lihat_riwayat():
@@ -29,11 +30,23 @@ def tampil_grafik(kolom, judul):
 def cek_stagnan(batas=3):
   df = muat_data()
   for nama, data in df.groupby("latihan"):
-    terakhir = data["selisih_beban"].tail(batas)
-    if (terakhir <= 0).all():
-      print(f"{nama}: STAGNAN, coba naikkan beban atau ubah program")
+    beban_stagnan = (data["selisih_beban"].tail(batas) <= 0).all()
+    volume_stagnan = (data["selisih_volume"].tail(batas) <= 0).all()
+    if data["selisih_beban"].iloc[-1] < 0:
+      print(f"{nama}: TURUN, beban sesi terakhir lebih ringan dari sebelumnya")
+      continue
+
+    if beban_stagnan and volume_stagnan:
+      print(f"{nama}: STAGNAN, beban dan volume sama-sama tidak naik")
+    elif beban_stagnan:
+      print(f"{nama}: beban datar, tapi volume masih naik")
     else:
-      print(F"{nama}: masih naik, lanjutkan")
+      print(f"{nama}: masih naik, lanjutkan")
+
+    if data["selisih_volume"].iloc[-1] < 0:
+      print(f"   peringatan: volume {nama} turun di sesi terakhir")
+
+
 
 def menu():
   while True:
