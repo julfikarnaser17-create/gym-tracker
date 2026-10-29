@@ -32,6 +32,7 @@ def cek_stagnan(batas=3):
   for nama, data in df.groupby("latihan"):
     beban_stagnan = (data["selisih_beban"].tail(batas) <= 0).all()
     volume_stagnan = (data["selisih_volume"].tail(batas) <= 0).all()
+    
     if data["selisih_beban"].iloc[-1] < 0:
       print(f"{nama}: TURUN, beban sesi terakhir lebih ringan dari sebelumnya")
       continue
